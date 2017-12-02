@@ -1,3 +1,4 @@
+from Process import Process
 from enum import Enum
 """
 State is a simple enum containing each of the potential process states
@@ -21,8 +22,11 @@ class MemoryStore():
         self.framesPerLine = framesPerLine
         self.memory = '.'*numFrames
         
-        #store a list of tuples containing the position and size of each process
+        #store a list of processes currently in the memory store
         self.processes = []
+        
+        #keep track of the current simulation time
+        self.simTime = 0
         
     """
     get the amount of free memory currently available in the store
@@ -59,12 +63,49 @@ class MemoryStore():
         border = '='*self.framesPerLine
         return border + '\n' + '\n'.join([self.memory[i:i+self.framesPerLine] for i in range(0, self.numFrames, self.framesPerLine)]) + '\n' + border
 
+    """
+    add a process to the store
+    @param process: the process to be added
+    """
+    def addProcess(self,process):
+        freeLocs = self.getFreeMemoryLocations()
+        #check all free memory locations for the first location big enough to contain the new process
+        for loc in freeLocs:
+            if (loc[1] >= process.memSize):
+                #we found a location for the process! add it to the processes list
+                self.processes.append(process)
+                process.memLocation = loc[0]
+                self.memory = self.memory[:loc[0]] + process.pid*process.memSize + self.memory[loc[0]+process.memSize:]
+                process.memEnterTime = self.simTime
+
+"""
+test printing a new Memory Store instance
+"""
+def testStoreOutput():
+    print("MemoryStore Sample Output: \n" + str(MemoryStore()))
+    
+"""
+test finding all free memory locations
+"""
+def testFreeMemoryLocations():
+    testMS = MemoryStore()
+    print("free memory locations for initial Store:", testMS.getFreeMemoryLocations())
+    print("free memory size:", testMS.getFreeMemory())
+    testMS.memory = testMS.memory[:4] + 'a' + testMS.memory[5:]
+    print("free memory locations after inserting 'a' at position 4:", testMS.getFreeMemoryLocations())
+    print("free memory size after inserting 'a' at position 4:", testMS.getFreeMemory())
+    
+"""
+test adding a process to a new Memory Store
+"""
+def testAddProcess():
+    testMS = MemoryStore()
+    print("initial processes:",testMS.processes)
+    print("initial memory locations:",testMS.getFreeMemoryLocations())
+    testMS.addProcess(Process('A',"6",["0/1"]))
+    print("new processes:",testMS.processes)
+    print("new memory locations:",testMS.getFreeMemoryLocations())
+    
 #test MemoryStore __str__ if we run this class file directly
 if __name__ == "__main__":
-    #print("MemoryStore Sample Output: \n" + str(MemoryStore()))
-    testMS = MemoryStore()
-    print(testMS.getFreeMemoryLocations())
-    print(testMS.getFreeMemory())
-    testMS.memory = testMS.memory[:4] + 'a' + testMS.memory[5:]
-    print(testMS.getFreeMemoryLocations())
-    print(testMS.getFreeMemory())
+    testAddProcess()
