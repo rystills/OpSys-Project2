@@ -1,5 +1,6 @@
 from Process import Process
 from enum import Enum
+import bisect
 """
 State is a simple enum containing each of the potential process states
 """
@@ -22,12 +23,14 @@ class MemoryStore():
         self.framesPerLine = framesPerLine
         self.memory = '.'*numFrames
         
-        #store a list of processes currently in the memory store
+        #store a list of processes currently in the memory store (sorted in order of smallest to greatest memLocation)
         self.processes = []
         
         #keep track of the current simulation time
         self.simTime = 0
         self.lastPlacedLoc = -1
+        
+        self.t_memmove = 1
         
     """
     get the amount of free memory currently available in the store
@@ -75,7 +78,22 @@ class MemoryStore():
     defragment our memory
     """
     def defragment(self):
-       
+        self.lastPlacedLoc = -1
+        for proc in self.processes:
+            earliestFree = self.memory.find('.')
+            if (earliestFree < proc.memLocation):
+                #there is free space in our memory before this location's starting value; move it up and increment time accordingly
+                removedMem = self.memory[:proc.memLocation] + self.memory[proc.memLocation+proc.memSize:]
+                reinsertedMem = removedMem[:earliestFree] + proc.pid * proc.memSize + removedMem[earliestFree:]
+                self.memory = reinsertedMem
+                #add t_memmove for each frame of memory in the process
+                self.simTime += proc.memSize * self.t_memmove            
+        
+    """
+    insert the specified process into our processes list sorted by memLocation
+    """
+    def insertProcess(self,process):
+        bisect.insort(self.processes,process)
 
     """
     add a process to the store using the next-fit algorithm
@@ -88,10 +106,10 @@ class MemoryStore():
         for loc in freeLocs:
             if (loc[1] >= process.memSize and loc[0] > self.lastPlacedLoc):
                 #we found a location for the process! add it to the processes list
-                self.processes.append(process)
                 process.memLocation = loc[0]
                 self.memory = self.memory[:loc[0]] + process.pid*process.memSize + self.memory[loc[0]+process.memSize:]
                 process.memEnterTime = self.simTime
+                self.insertProcess(process)
                 self.lastPlacedLoc = loc[0]
                 return True
         
@@ -99,10 +117,10 @@ class MemoryStore():
         for loc in freeLocs:
             if (loc[1] >= process.memSize and loc[0] <= self.lastPlacedLoc):
                 #we found a location for the process! add it to the processes list
-                self.processes.append(process)
                 process.memLocation = loc[0]
                 self.memory = self.memory[:loc[0]] + process.pid*process.memSize + self.memory[loc[0]+process.memSize:]
                 process.memEnterTime = self.simTime
+                self.insertProcess(process)
                 self.lastPlacedLoc = loc[0]
                 return True
             
@@ -125,10 +143,10 @@ class MemoryStore():
         for loc in freeLocs:
             if (loc[1] >= process.memSize):
                 #we found a location for the process! add it to the processes list
-                self.processes.append(process)
                 process.memLocation = loc[0]
                 self.memory = self.memory[:loc[0]] + process.pid*process.memSize + self.memory[loc[0]+process.memSize:]
                 process.memEnterTime = self.simTime
+                self.insertProcess(process)
                 self.lastPlacedLoc = loc[0]
                 return True
             
@@ -158,10 +176,10 @@ class MemoryStore():
                     
         if (smallestValidLoc != None):
             #we found a location for the process! add it to the processes list
-                self.processes.append(process)
                 process.memLocation = smallestValidLoc
                 self.memory = self.memory[:smallestValidLoc] + process.pid*process.memSize + self.memory[smallestValidLoc+process.memSize:]
                 process.memEnterTime = self.simTime
+                self.insertProcess(process)
                 self.lastPlacedLoc = smallestValidLoc
                 return True
             
@@ -223,6 +241,6 @@ def testAddProcessBest():
     print("new processes:",testMS.processes)
     print("new memory locations:",testMS.getFreeMemoryLocations()) 
     
-#test MemoryStore __str__ if we run this class file directly
+#try one of the above tests if we run this class directly
 if __name__ == "__main__":
     testAddProcessBest()

@@ -35,8 +35,8 @@ class Process():
             self.pid,self.memSize,self.arrivalRunPairs,self.memLocation,self.memEnterTime)
                 
     """
-    override the less-than operator for priority queue sorting based on PID
+    override the less-than operator for priority queue sorting based on memLocation
     @param other: the process we are comparing ourselves to
     """
     def __lt__(self, other):
-        return self.pid < other.pid
+        return self.memLocation < other.memLocation
