@@ -67,8 +67,9 @@ class MemoryStore():
     """
     add a process to the store using the next-fit algorithm
     @param process: the process to be added
+    @param firstRun: whether we are running the process for the first time (true) or immediately after a defragmentation (false)
     """
-    def addProcessNext(self,process):
+    def addProcessNext(self,process, firstRun = True):
         freeLocs = self.getFreeMemoryLocations()
         #check all free memory locations for the first location big enough to contain the new process
         for loc in freeLocs:
@@ -79,12 +80,32 @@ class MemoryStore():
                 self.memory = self.memory[:loc[0]] + process.pid*process.memSize + self.memory[loc[0]+process.memSize:]
                 process.memEnterTime = self.simTime
                 self.lastPlacedLoc = loc[0]
+                return True
+        
+        #we didn't find a valid memory location after lastPlacedLoc, so now let's search again from the beginning up to lastPlacedLoc
+        for loc in freeLocs:
+            if (loc[1] >= process.memSize and loc[0] <= self.lastPlacedLoc):
+                #we found a location for the process! add it to the processes list
+                self.processes.append(process)
+                process.memLocation = loc[0]
+                self.memory = self.memory[:loc[0]] + process.pid*process.memSize + self.memory[loc[0]+process.memSize:]
+                process.memEnterTime = self.simTime
+                self.lastPlacedLoc = loc[0]
+                return True
+            
+        #we didn't find a location at which to place the process, so defragment and try again
+        if (firstRun):
+            self.defragment()
+            return self.addProcessNext(process, False)
+        #we already defragmented and still didn't find a location, so nothing we can do
+        return False
 
     """
     add a process to the store using the first-fit algorithm
     @param process: the process to be added
+    @param firstRun: whether we are running the process for the first time (true) or immediately after a defragmentation (false)
     """
-    def addProcessFirst(self,process):
+    def addProcessFirst(self,process, firstRun = True):
         freeLocs = self.getFreeMemoryLocations()
         #check all free memory locations for the first location big enough to contain the new process
         for loc in freeLocs:
@@ -95,12 +116,21 @@ class MemoryStore():
                 self.memory = self.memory[:loc[0]] + process.pid*process.memSize + self.memory[loc[0]+process.memSize:]
                 process.memEnterTime = self.simTime
                 self.lastPlacedLoc = loc[0]
+                return True
+            
+        #we didn't find a location at which to place the process, so defragment and try again
+        if (firstRun):
+            self.defragment()
+            return self.addProcessFirst(process, False)
+        #we already defragmented and still didn't find a location, so nothing we can do
+        return False
                 
     """
     add a process to the store using the best-fit algorithm
     @param process: the process to be added
+    @param firstRun: whether we are running the process for the first time (true) or immediately after a defragmentation (false)
     """
-    def addProcessBest(self,process):
+    def addProcessBest(self,process, firstRun = True):
         freeLocs = self.getFreeMemoryLocations()
         #check all free memory locations for the smallest location big enough to contain the new process
         smallestValidLocSize = None
@@ -118,6 +148,14 @@ class MemoryStore():
                 self.memory = self.memory[:smallestValidLoc] + process.pid*process.memSize + self.memory[smallestValidLoc+process.memSize:]
                 process.memEnterTime = self.simTime
                 self.lastPlacedLoc = smallestValidLoc
+                return True
+            
+        #we didn't find a location at which to place the process, so defragment and try again
+        if (firstRun):
+            self.defragment()
+            return self.addProcessBest(process, False)
+        #we already defragmented and still didn't find a location, so nothing we can do
+        return False
 
 """
 test printing a new Memory Store instance
