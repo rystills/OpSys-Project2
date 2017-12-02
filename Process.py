@@ -27,7 +27,7 @@ class Process():
     return a string displaying this process' pid, memsize, and arrival/run pairs
     """         
     def __repr__(self):
-        return "Process {0} of size {1} with arrivalRunPairs: {2}".format(self.pid,self.memSize,self.arrivalRunPairs)
+        return "PID {0}: size={1} arrivalRunPairs={2}".format(self.pid,self.memSize,self.arrivalRunPairs)
                 
     """
     override the less-than operator for priority queue sorting based on PID
