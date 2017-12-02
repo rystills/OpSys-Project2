@@ -95,6 +95,29 @@ class MemoryStore():
                 self.memory = self.memory[:loc[0]] + process.pid*process.memSize + self.memory[loc[0]+process.memSize:]
                 process.memEnterTime = self.simTime
                 self.lastPlacedLoc = loc[0]
+                
+    """
+    add a process to the store using the best-fit algorithm
+    @param process: the process to be added
+    """
+    def addProcessBest(self,process):
+        freeLocs = self.getFreeMemoryLocations()
+        #check all free memory locations for the smallest location big enough to contain the new process
+        smallestValidLocSize = None
+        smallestValidLoc = None
+        for loc in freeLocs:
+            if (loc[1] >= process.memSize):
+                if (smallestValidLocSize == None or loc[1] < smallestValidLocSize):
+                    smallestValidLocSize = loc[1]
+                    smallestValidLoc = loc[0]
+                    
+        if (smallestValidLoc != None):
+            #we found a location for the process! add it to the processes list
+                self.processes.append(process)
+                process.memLocation = smallestValidLoc
+                self.memory = self.memory[:smallestValidLoc] + process.pid*process.memSize + self.memory[smallestValidLoc+process.memSize:]
+                process.memEnterTime = self.simTime
+                self.lastPlacedLoc = smallestValidLoc
 
 """
 test printing a new Memory Store instance
@@ -135,6 +158,17 @@ def testAddProcessFirst():
     print("new processes:",testMS.processes)
     print("new memory locations:",testMS.getFreeMemoryLocations())
     
+"""
+test adding a process to a new Memory Store
+"""
+def testAddProcessBest():
+    testMS = MemoryStore()
+    print("initial processes:",testMS.processes)
+    print("initial memory locations:",testMS.getFreeMemoryLocations())
+    testMS.addProcessBest(Process('A',"6",["0/1"]))
+    print("new processes:",testMS.processes)
+    print("new memory locations:",testMS.getFreeMemoryLocations()) 
+    
 #test MemoryStore __str__ if we run this class file directly
 if __name__ == "__main__":
-    testAddProcessNext()
+    testAddProcessBest()
