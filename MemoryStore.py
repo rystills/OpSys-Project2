@@ -65,6 +65,19 @@ class MemoryStore():
         return border + '\n' + '\n'.join([self.memory[i:i+self.framesPerLine] for i in range(0, self.numFrames, self.framesPerLine)]) + '\n' + border
 
     """
+    check whether or not a defragmentation will free up enough space to place the desired process
+    @param memNeeded: the amount of memory we need to have after defragmenting
+    """
+    def defragmentWillWork(self, memNeeded):
+        return memNeeded <= self.getFreeMemory()
+
+    """
+    defragment our memory
+    """
+    def defragment(self):
+       
+
+    """
     add a process to the store using the next-fit algorithm
     @param process: the process to be added
     @param firstRun: whether we are running the process for the first time (true) or immediately after a defragmentation (false)
@@ -95,8 +108,9 @@ class MemoryStore():
             
         #we didn't find a location at which to place the process, so defragment and try again
         if (firstRun):
-            self.defragment()
-            return self.addProcessNext(process, False)
+            if (self.defragmentWillWork(process.memSize)):
+                self.defragment()
+                return self.addProcessNext(process, False)
         #we already defragmented and still didn't find a location, so nothing we can do
         return False
 
@@ -120,8 +134,9 @@ class MemoryStore():
             
         #we didn't find a location at which to place the process, so defragment and try again
         if (firstRun):
-            self.defragment()
-            return self.addProcessFirst(process, False)
+            if (self.defragmentWillWork(process.memSize)):
+                self.defragment()
+                return self.addProcessFirst(process, False)
         #we already defragmented and still didn't find a location, so nothing we can do
         return False
                 
@@ -152,8 +167,9 @@ class MemoryStore():
             
         #we didn't find a location at which to place the process, so defragment and try again
         if (firstRun):
-            self.defragment()
-            return self.addProcessBest(process, False)
+            if (self.defragmentWillWork(process.memSize)):
+                self.defragment()
+                return self.addProcessBest(process, False)
         #we already defragmented and still didn't find a location, so nothing we can do
         return False
 
