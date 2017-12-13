@@ -81,6 +81,7 @@ class MemoryStore():
     def defragment(self):
         #keep track of how far we move time forward so we can push back events accordingly
         prevSimTime = Simulator.simTime
+        affectedProcesses = []
         
         self.lastPlacedLoc = -1
         for proc in self.processes:
@@ -92,12 +93,17 @@ class MemoryStore():
                 self.memory = reinsertedMem
                 #add t_memmove for each frame of memory in the process
                 Simulator.simTime += self.t_memmove * proc.memSize
+                affectedProcesses.append(proc)
         
         timeDiff = Simulator.simTime - prevSimTime
         
         #update all events to compensate for elapsed time during defragmentation
         for ev in Simulator.events.queue:
                 ev.time += timeDiff
+        
+        print("time {0}ms: Defragmentation complete (moved {1} frames: {2})".format(Simulator.simTime,timeDiff,
+                                                                                    str([p.pid for p in affectedProcesses]).strip('[').strip(']').replace("'","")))
+        print(self)
 
     """
     insert the specified process into our processes list sorted by memLocation
@@ -147,6 +153,7 @@ class MemoryStore():
         #we didn't find a location at which to place the process, so defragment and try again
         if (firstRun):
             if (self.defragmentWillWork(process.memSize)):
+                print("time {0}ms: Cannot place process {1} -- starting defragmentation".format(Simulator.simTime,process.pid))
                 self.defragment()
                 return self.addProcessNext(process, False)
         #we already defragmented and still didn't find a location, so nothing we can do
@@ -173,6 +180,7 @@ class MemoryStore():
         #we didn't find a location at which to place the process, so defragment and try again
         if (firstRun):
             if (self.defragmentWillWork(process.memSize)):
+                print("time {0}ms: Cannot place process {1} -- starting defragmentation".format(Simulator.simTime,process.pid))
                 self.defragment()
                 return self.addProcessFirst(process, False)
         #we already defragmented and still didn't find a location, so nothing we can do
@@ -206,6 +214,7 @@ class MemoryStore():
         #we didn't find a location at which to place the process, so defragment and try again
         if (firstRun):
             if (self.defragmentWillWork(process.memSize)):
+                print("time {0}ms: Cannot place process {1} -- starting defragmentation".format(Simulator.simTime,process.pid))
                 self.defragment()
                 return self.addProcessBest(process, False)
         #we already defragmented and still didn't find a location, so nothing we can do
