@@ -128,7 +128,7 @@ class MemoryStore():
                 #we found a location for the process! add it to the processes list
                 process.memLocation = loc[0]
                 self.memory = self.memory[:loc[0]] + process.pid*process.memSize + self.memory[loc[0]+process.memSize:]
-                process.memEnterTime = self.simTime
+                process.memEnterTime = Simulator.simTime
                 self.insertProcess(process)
                 self.lastPlacedLoc = loc[0]
                 return True
@@ -139,7 +139,7 @@ class MemoryStore():
                 #we found a location for the process! add it to the processes list
                 process.memLocation = loc[0]
                 self.memory = self.memory[:loc[0]] + process.pid*process.memSize + self.memory[loc[0]+process.memSize:]
-                process.memEnterTime = self.simTime
+                process.memEnterTime = Simulator.simTime
                 self.insertProcess(process)
                 self.lastPlacedLoc = loc[0]
                 return True
@@ -165,7 +165,7 @@ class MemoryStore():
                 #we found a location for the process! add it to the processes list
                 process.memLocation = loc[0]
                 self.memory = self.memory[:loc[0]] + process.pid*process.memSize + self.memory[loc[0]+process.memSize:]
-                process.memEnterTime = self.simTime
+                process.memEnterTime = Simulator.simTime
                 self.insertProcess(process)
                 self.lastPlacedLoc = loc[0]
                 return True
@@ -198,7 +198,7 @@ class MemoryStore():
             #we found a location for the process! add it to the processes list
                 process.memLocation = smallestValidLoc
                 self.memory = self.memory[:smallestValidLoc] + process.pid*process.memSize + self.memory[smallestValidLoc+process.memSize:]
-                process.memEnterTime = self.simTime
+                process.memEnterTime = Simulator.simTime
                 self.insertProcess(process)
                 self.lastPlacedLoc = smallestValidLoc
                 return True

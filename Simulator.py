@@ -97,7 +97,7 @@ def run():
     this.showStartMessage()
     #populate the event queue with the arrival event for all processes
     for p in this.processes:
-        addEvent(EventType.SwitchIn,p.arrivalRunPairs[0], p)
+        addEvent(EventType.SwitchIn,p.arrivalRunPairs[0][0], p)
         
     #jump from event to event
     while(not this.events.empty()):
