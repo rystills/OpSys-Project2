@@ -133,27 +133,31 @@ class MemoryStore():
         for loc in freeLocs:
             if (loc[1] >= process.memSize and loc[0] > self.lastPlacedLoc):
                 #we found a location for the process! add it to the processes list
-                startPos = loc[0]# if loc[0] >= self.lastPlacedLoc else self.lastPlacedLoc
-                process.memLocation = startPos
-                self.memory = self.memory[:startPos] + process.pid*process.memSize + self.memory[startPos+process.memSize:]
-                process.memEnterTime = Simulator.simTime
-                self.insertProcess(process)
-                self.lastPlacedLoc = startPos + process.memSize
-                return True
+                return self.addProcessAtLocation(process,loc[0])
         
         #we didn't find a valid memory location after lastPlacedLoc, so now let's search again from the beginning up to lastPlacedLoc
         for loc in freeLocs:
             if (loc[1] >= process.memSize and loc[0] <= self.lastPlacedLoc):
                 #we found a location for the process! add it to the processes list
-                process.memLocation = loc[0]
-                self.memory = self.memory[:loc[0]] + process.pid*process.memSize + self.memory[loc[0]+process.memSize:]
-                process.memEnterTime = Simulator.simTime
-                self.insertProcess(process)
-                self.lastPlacedLoc = loc[0] + process.memSize
-                return True
+                return self.addProcessAtLocation(process,loc[0])
+                
             
         #we didn't find a location at which to place the process, so defragment and try again
         return self.checkFirstRun(firstRun,self.addProcessNext,process)
+    
+    """
+    add the desired process at the specified location in memory
+    @param process: the process to add into memory
+    @param loc: the location in memory at which to add the process
+    @returns true
+    """
+    def addProcessAtLocation(self,proc,loc):
+        proc.memLocation = loc
+        self.memory = self.memory[:loc] + proc.pid*proc.memSize + self.memory[loc+proc.memSize:]
+        proc.memEnterTime = Simulator.simTime
+        self.insertProcess(proc)
+        self.lastPlacedLoc = loc + proc.memSize
+        return True
     
     """
     check if we are on the first pass of attempting to add a process. if so, defrag if it will generate enough space
@@ -182,12 +186,7 @@ class MemoryStore():
         for loc in freeLocs:
             if (loc[1] >= process.memSize):
                 #we found a location for the process! add it to the processes list
-                process.memLocation = loc[0]
-                self.memory = self.memory[:loc[0]] + process.pid*process.memSize + self.memory[loc[0]+process.memSize:]
-                process.memEnterTime = Simulator.simTime
-                self.insertProcess(process)
-                self.lastPlacedLoc = loc[0] + process.memSize
-                return True
+                return self.addProcessAtLocation(process,loc[0])
             
         #we didn't find a location at which to place the process, so defragment and try again
         return self.checkFirstRun(firstRun,self.addProcessFirst,process)
@@ -210,12 +209,7 @@ class MemoryStore():
                     
         if (smallestValidLoc != None):
             #we found a location for the process! add it to the processes list
-                process.memLocation = smallestValidLoc
-                self.memory = self.memory[:smallestValidLoc] + process.pid*process.memSize + self.memory[smallestValidLoc+process.memSize:]
-                process.memEnterTime = Simulator.simTime
-                self.insertProcess(process)
-                self.lastPlacedLoc = smallestValidLoc + process.memSize
-                return True
+            return self.addProcessAtLocation(process,smallestValidLoc)
             
         #we didn't find a location at which to place the process, so defragment and try again
         return self.checkFirstRun(firstRun,self.addProcessBest,process)
