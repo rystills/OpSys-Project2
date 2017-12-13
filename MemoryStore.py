@@ -29,7 +29,7 @@ class MemoryStore():
         #store a list of processes currently in the memory store (sorted in order of smallest to greatest memLocation)
         self.processes = []
         
-        self.lastPlacedLoc = -1
+        self.lastPlacedLoc = 0
         
         self.t_memmove = 1
         
@@ -83,7 +83,7 @@ class MemoryStore():
         prevSimTime = Simulator.simTime
         affectedProcesses = []
         
-        self.lastPlacedLoc = -1
+        self.lastPlacedLoc = 0
         for proc in self.processes:
             earliestFree = self.memory.find('.')
             if (earliestFree < proc.memLocation):
@@ -121,29 +121,6 @@ class MemoryStore():
                 
         #remove the process from our processes list
         self.processes.remove(process)
-
-    """
-    add a process to the store using the next-fit algorithm
-    @param process: the process to be added
-    @param firstRun: whether we are running the process for the first time (true) or immediately after a defragmentation (false)
-    """
-    def addProcessNext(self,process, firstRun = True):
-        freeLocs = self.getFreeMemoryLocations()
-        #check all free memory locations for the first location big enough to contain the new process
-        for loc in freeLocs:
-            if (loc[1] >= process.memSize and loc[0] > self.lastPlacedLoc):
-                #we found a location for the process! add it to the processes list
-                return self.addProcessAtLocation(process,loc[0])
-        
-        #we didn't find a valid memory location after lastPlacedLoc, so now let's search again from the beginning up to lastPlacedLoc
-        for loc in freeLocs:
-            if (loc[1] >= process.memSize and loc[0] <= self.lastPlacedLoc):
-                #we found a location for the process! add it to the processes list
-                return self.addProcessAtLocation(process,loc[0])
-                
-            
-        #we didn't find a location at which to place the process, so defragment and try again
-        return self.checkFirstRun(firstRun,self.addProcessNext,process)
     
     """
     add the desired process at the specified location in memory
@@ -174,6 +151,43 @@ class MemoryStore():
                 return func(proc,False)
         #we already defragmented and still didn't find a location, so nothing we can do
         return False
+    
+    """
+    add a process to the store using the next-fit algorithm
+    @param process: the process to be added
+    @param firstRun: whether we are running the process for the first time (true) or immediately after a defragmentation (false)
+    """
+    def addProcessNext(self,process, firstRun = True):
+        #iterate from lastPlacedLoc to the end of memory, looking for a large enough slot
+        pos = self.lastPlacedLoc
+        while (pos+process.memSize <= len(self.memory)):
+            if (self.memory[pos] == '.'):
+                #this is a valid space and our process will fit; now check that all required slots are free
+                slotsFree = True
+                for i in range(process.memSize):
+                    if (self.memory[pos+i] != '.'):
+                        slotsFree = False
+                        break
+                if (slotsFree):
+                    return self.addProcessAtLocation(process,pos)
+            pos += 1
+        
+        #we didn't find a valid memory location after lastPlacedLoc, so now let's search again from the beginning up to lastPlacedLoc
+        pos = 0
+        while (pos < self.lastPlacedLoc and pos+process.memSize <= len(self.memory)):
+            if (self.memory[pos] == '.'):
+                #this is a valid space and our process will fit; now check that all required slots are free
+                slotsFree = True
+                for i in range(process.memSize):
+                    if (self.memory[pos+i] != '.'):
+                        slotsFree = False
+                        break
+                if (slotsFree):
+                    return self.addProcessAtLocation(process,pos)
+            pos += 1
+        
+        #we didn't find a location at which to place the process, so defragment and try again
+        return self.checkFirstRun(firstRun,self.addProcessNext,process)         
 
     """
     add a process to the store using the first-fit algorithm

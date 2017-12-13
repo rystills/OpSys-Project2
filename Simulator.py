@@ -6,7 +6,9 @@ import sys
 #set 'this' to point to this module, so we can maintain module-wide globals
 this = sys.modules[__name__]
 
-#The Simulator class is a static class responsible for emulating our CPU, Running through the input processes using the selected algorithm
+"""
+The Simulator class is a static class responsible for emulating our CPU, Running through the input processes using the selected algorithm
+"""
 this.algo = MemoryAlgorithm.bestFit
 this.simTime = 0
 this.processes = []
