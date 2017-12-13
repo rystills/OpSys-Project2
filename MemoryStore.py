@@ -33,6 +33,9 @@ class MemoryStore():
         
         self.t_memmove = 1
         
+        #dict of pid:[(pageNum,frameNum)]
+        self.pageTable = {}
+        
     """
     get the amount of free memory currently available in the store
     """
@@ -67,7 +70,25 @@ class MemoryStore():
     def __str__(self):
         border = '='*self.framesPerLine
         return border + '\n' + '\n'.join([self.memory[i:i+self.framesPerLine] for i in range(0, self.numFrames, self.framesPerLine)]) + '\n' + border
-
+    
+    """
+    print the current state of the page table
+    """
+    def displayPageTable(self):
+        print("PAGE TABLE [page,frame]:")
+        #print out the page table ordered by pid
+        keys = list(self.pageTable.keys())
+        keys.sort()
+        for key in keys:
+            print("{0}: ".format(key),end='')
+            #print out all entries corresponding to this key, with a newline after every 10th entry
+            vals = self.pageTable[key]
+            for i in range(len(vals)):
+                print((' ' if i%10 != 0 else '') + str(vals[i]).replace('(','[').replace(')',']').replace(' ',''),end=('\n' if (i+1)%10 == 0 else ''))
+            #print a newline before moving on to the next value unless we just finished a row
+            if (len(vals) % 10 != 0):
+                print()
+                      
     """
     check whether or not a defragmentation will free up enough space to place the desired process
     @param memNeeded: the amount of memory we need to have after defragmenting
@@ -116,8 +137,15 @@ class MemoryStore():
     remove the specified process from the memory store
     """
     def removeProcess(self,process):
-        #remove the process from memory
-        self.memory = self.memory[:process.memLocation] + '.'*process.memSize + self.memory[process.memLocation+process.memSize:]
+        if (process.pid in self.pageTable):
+            self.pageTable.pop(process.pid)
+            #iterate over memory, removing all references to the process
+            for i in range(len(self.memory)):
+                if (self.memory[i] == process.pid):
+                    self.memory = self.memory[:i] + '.' + self.memory[i+1:]
+        else:
+            #remove the process from memory
+            self.memory = self.memory[:process.memLocation] + '.'*process.memSize + self.memory[process.memLocation+process.memSize:]
                 
         #remove the process from our processes list
         self.processes.remove(process)
@@ -151,6 +179,35 @@ class MemoryStore():
                 return func(proc,False)
         #we already defragmented and still didn't find a location, so nothing we can do
         return False
+    
+    """
+    add a process to memory utilizing our page table
+    @param process: the process to add to memory
+    @returns whether the process was added successfully (true) or not (false)
+    """
+    def addProcessPageTable(self, process):
+        #first make sure there is enough space in memory
+        if (not self.defragmentWillWork(process.memSize)):
+            return False
+        
+        #begin building up a list of pid memory locations, to be added to our pageTable at the end
+        newPages = []
+        pagesAdded = 0
+        for i in range(len(self.memory)):
+            if (self.memory[i] == '.'):
+                #this memory slot is free; add the process here
+                self.memory = self.memory[:i] + process.pid + self.memory[i+1:]
+                newPages.append((pagesAdded,i))
+                pagesAdded += 1
+                
+                #stop once we've allocated enough pages
+                if (pagesAdded == process.memSize):
+                    break
+        
+        #apply the new pageList to the pageTable and return success  
+        self.pageTable[process.pid] = newPages
+        self.processes.append(process)
+        return True
     
     """
     add a process to the store using the next-fit algorithm

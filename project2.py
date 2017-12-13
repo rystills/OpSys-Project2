@@ -60,6 +60,7 @@ def main():
     Simulator.processes = copy.deepcopy(processes)
     Simulator.algo = MemoryAlgorithm.bestFit
     Simulator.run()
+    print()
     
     #run non-contiguous
     Simulator.reset()

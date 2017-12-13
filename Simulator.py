@@ -49,10 +49,10 @@ show a message indicating that the Simulator has ended
 """
 def showStopMessage():
     if (this.contiguous):
-        print("time 0ms: Simulator ended (Contiguous -- {0})".format("Next-Fit" if this.algo == MemoryAlgorithm.nextFit else 
+        print("time {0}ms: Simulator ended (Contiguous -- {1})".format(this.simTime, "Next-Fit" if this.algo == MemoryAlgorithm.nextFit else 
                                                             ("First-Fit" if this.algo == MemoryAlgorithm.firstFit else "Best-Fit")))
     else:
-        print("time 0ms: Simulator ended (Non-contiguous)")
+        print("time {0}ms: Simulator ended (Non-contiguous)".format(this.simTime))
     
 """
 process the specified event, calling the corresponding helper method
@@ -75,13 +75,16 @@ def handleSwitchIn(event):
     print("time {0}ms: Process {1} arrived (requires {2} frames)".format(this.simTime, p.pid, p.memSize))
     retVal = False
     
-    #call the placement function corresponding to our current memory algorithm
-    if (this.algo == MemoryAlgorithm.nextFit):
-        retVal = this.memStore.addProcessNext(p)
-    elif (this.algo == MemoryAlgorithm.firstFit):
-        retVal = this.memStore.addProcessFirst(p)
-    elif (this.algo == MemoryAlgorithm.bestFit):
-        retVal = this.memStore.addProcessBest(p)
+    if (not this.contiguous):
+        retVal = this.memStore.addProcessPageTable(p)
+    else:
+        #call the placement function corresponding to our current contiguous memory algorithm
+        if (this.algo == MemoryAlgorithm.nextFit):
+            retVal = this.memStore.addProcessNext(p)
+        elif (this.algo == MemoryAlgorithm.firstFit):
+            retVal = this.memStore.addProcessFirst(p)
+        elif (this.algo == MemoryAlgorithm.bestFit):
+            retVal = this.memStore.addProcessBest(p)
     
     #show success or failure depending on whether or not we were able to place the process in memory
     if (retVal):
@@ -91,6 +94,8 @@ def handleSwitchIn(event):
     else:
         print("time {0}ms: Cannot place process {1} -- skipped!".format(this.simTime, p.pid))
     print(this.memStore)
+    if (not this.contiguous):
+        this.memStore.displayPageTable()
 
 """
 when a process switches out, display that information and remove it from the Memory Store
@@ -101,6 +106,8 @@ def handleSwitchOut(event):
     print("time {0}ms: Process {1} removed:".format(this.simTime, p.pid))
     this.memStore.removeProcess(p)
     print(this.memStore)
+    if (not this.contiguous):
+        this.memStore.displayPageTable()
     p.pairsCompleted += 1
 
 """
