@@ -93,6 +93,7 @@ def handleSwitchIn(event):
         addEvent(EventType.SwitchOut, this.simTime + p.arrivalRunPairs[p.pairsCompleted][1], p)
     else:
         print("time {0}ms: Cannot place process {1} -- skipped!".format(this.simTime, p.pid))
+        p.pairsCompleted += 1
     print(this.memStore)
     if (not this.contiguous):
         this.memStore.displayPageTable()
