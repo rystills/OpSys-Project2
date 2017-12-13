@@ -2,6 +2,7 @@ from Process import Process
 from enum import Enum
 from Event import Event, EventType
 import bisect
+from Simulator import Simulator
 
 """
 State is a simple enum containing each of the potential process states
@@ -28,8 +29,6 @@ class MemoryStore():
         #store a list of processes currently in the memory store (sorted in order of smallest to greatest memLocation)
         self.processes = []
         
-        #keep track of the current simulation time
-        self.simTime = 0
         self.lastPlacedLoc = -1
         
         self.t_memmove = 1
@@ -81,7 +80,7 @@ class MemoryStore():
     """
     def defragment(self):
         #keep track of how far we move time forward so we can push back events accordingly
-        prevSimTime = self.simTime
+        prevSimTime = Simulator.simTime
         
         self.lastPlacedLoc = -1
         for proc in self.processes:
@@ -92,13 +91,13 @@ class MemoryStore():
                 reinsertedMem = removedMem[:earliestFree] + proc.pid * proc.memSize + removedMem[earliestFree:]
                 self.memory = reinsertedMem
                 #add t_memmove for each frame of memory in the process
-                self.simTime += self.t_memmove * proc.memSize
+                Simulator.simTime += self.t_memmove * proc.memSize
         
-        timeDiff = self.simTime - prevSimTime
+        timeDiff = Simulator.simTime - prevSimTime
         
         #update all events to compensate for elapsed time during defragmentation
-        for ev in self.events:
-                ev.time += timeDiff    
+        for ev in Simulator.events:
+                ev.time += timeDiff
 
     """
     insert the specified process into our processes list sorted by memLocation

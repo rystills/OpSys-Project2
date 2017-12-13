@@ -1,5 +1,6 @@
 import sys
 from Process import Process
+from MemoryStore import MemoryStore
     
 """
 display a message on standard error and exit the program
@@ -38,7 +39,7 @@ def main():
 
     #extract our processes from the input file, then begin the simulation
     processes = readInput(sys.argv[1])
-    print(processes)
+    sim = MemoryStore()
     
 if __name__ == "__main__":
     main()
