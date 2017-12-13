@@ -94,6 +94,7 @@ class MemoryStore():
                 #add t_memmove for each frame of memory in the process
                 Simulator.simTime += self.t_memmove * proc.memSize
                 affectedProcesses.append(proc)
+                proc.memLocation = earliestFree;
         
         timeDiff = Simulator.simTime - prevSimTime
         
