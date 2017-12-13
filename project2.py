@@ -22,7 +22,7 @@ def readInput(fileName):
             #make sure the input line contains at least 3 elements (type-checking and validity will be handled in Process constructor) 
             splitLine = line.strip().split(' ')
             if (len(splitLine) < 3):
-                exitError("Invalid input file format")
+                raise TypeError()
             processes.append(Process(splitLine[0],splitLine[1],splitLine[2:]))
     except (IOError, TypeError):
         exitError("Invalid input file format")

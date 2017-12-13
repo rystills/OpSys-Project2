@@ -10,7 +10,7 @@ class Process():
     """
     def __init__(self, pid, memSize, arrivalRunPairs):
         self.pid = pid
-        
+        #ensure that memSize is formatted as a valid number
         if (not memSize.isdigit()):
             raise TypeError()
         self.memSize = int(memSize)
