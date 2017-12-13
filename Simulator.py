@@ -64,13 +64,20 @@ when a process switches in, display that information and add it to the Memory St
 def handleSwitchIn(event):
     p = event.process
     print("time {0}ms: Process {1} arrived (requires {2} frames)".format(this.simTime, p.pid, p.arrivalRunPairs[p.pairsCompleted][1]))
+    retVal = False
     
     if (this.algo == MemoryAlgorithm.nextFit):
-        this.memStore.addProcessNext(p)
+        retVal = this.memStore.addProcessNext(p)
     elif (this.algo == MemoryAlgorithm.firstFit):
-        this.memStore.addProcessFirst(p)
+        retVal = this.memStore.addProcessFirst(p)
     elif (this.algo == MemoryAlgorithm.bestFit):
-        this.memStore.addProcessBest(p)
+        retVal = this.memStore.addProcessBest(p)
+    
+    if (retVal):
+        print("time {0}ms: Placed process {1}:".format(this.simTime, p.pid))
+        print(this.memStore)
+    else:
+        print("time {0}ms: Cannot place process {1} -- skipped".format(this.simTime, p.pid))
 
 """
 when a process switches out, display that information and remove it from the Memory Store
