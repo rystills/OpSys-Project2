@@ -66,6 +66,7 @@ def handleSwitchIn(event):
     print("time {0}ms: Process {1} arrived (requires {2} frames)".format(this.simTime, p.pid, p.arrivalRunPairs[p.pairsCompleted][1]))
     retVal = False
     
+    #call the placement function corresponding to our current memory algorithm
     if (this.algo == MemoryAlgorithm.nextFit):
         retVal = this.memStore.addProcessNext(p)
     elif (this.algo == MemoryAlgorithm.firstFit):
@@ -73,9 +74,12 @@ def handleSwitchIn(event):
     elif (this.algo == MemoryAlgorithm.bestFit):
         retVal = this.memStore.addProcessBest(p)
     
+    #show success or failure depending on whether or not we were able to place the process in memory
     if (retVal):
         print("time {0}ms: Placed process {1}:".format(this.simTime, p.pid))
         print(this.memStore)
+        #upon placing the process, add a corresponding removal event
+        addEvent(EventType.SwitchOut, this.simTime + p.arrivalRunPairs[p.pairsCompleted][1], p)
     else:
         print("time {0}ms: Cannot place process {1} -- skipped".format(this.simTime, p.pid))
 
@@ -95,9 +99,11 @@ run the simulation
 """
 def run():
     this.showStartMessage()
-    #populate the event queue with the arrival event for all processes
+    
+    #populate the event queue with all arrival events for all processes
     for p in this.processes:
-        addEvent(EventType.SwitchIn,p.arrivalRunPairs[0][0], p)
+        for i in range(len(p.arrivalRunPairs)):
+            addEvent(EventType.SwitchIn,p.arrivalRunPairs[i][0], p)
         
     #jump from event to event
     while(not this.events.empty()):

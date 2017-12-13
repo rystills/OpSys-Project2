@@ -96,7 +96,7 @@ class MemoryStore():
         timeDiff = Simulator.simTime - prevSimTime
         
         #update all events to compensate for elapsed time during defragmentation
-        for ev in Simulator.events:
+        for ev in Simulator.events.queue:
                 ev.time += timeDiff
 
     """
