@@ -1,4 +1,3 @@
-import copy
 import queue
 from Event import Event, EventType
 from MemoryStore import MemoryStore, MemoryAlgorithm
@@ -21,7 +20,7 @@ Reset the simulator, clearing all processes, and setting time back to 0
 def reset():
     this.simTime = 0
     this.processes = []
-    this.events = []
+    this.events = queue.PriorityQueue()
     this.memStore = MemoryStore()
     
 """

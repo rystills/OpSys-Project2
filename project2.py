@@ -1,3 +1,4 @@
+import copy
 import sys
 from Process import Process
 import Simulator
@@ -40,7 +41,17 @@ def main():
 
     #extract our processes from the input file, then begin the simulation
     processes = readInput(sys.argv[1])
-    Simulator.processes = processes
+    Simulator.processes = copy.deepcopy(processes)
+    Simulator.algo = MemoryAlgorithm.nextFit
+    Simulator.run()
+    
+    Simulator.reset()
+    Simulator.processes = copy.deepcopy(processes)
+    Simulator.algo = MemoryAlgorithm.firstFit
+    Simulator.run()
+    
+    Simulator.reset()
+    Simulator.processes = copy.deepcopy(processes)
     Simulator.algo = MemoryAlgorithm.bestFit
     Simulator.run()
     
