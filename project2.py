@@ -1,6 +1,7 @@
 import sys
 from Process import Process
-from MemoryStore import MemoryStore
+import Simulator
+from MemoryStore import MemoryAlgorithm
     
 """
 display a message on standard error and exit the program
@@ -35,11 +36,13 @@ main method: parse the input file while checking for errors, then start our simu
 def main():
     #make sure the user specifies the correct number of arguments
     if (len(sys.argv) < 2):
-        exitError("ERROR: Invalid arguments\nUSAGE: /usr/bin/python3.5 project1.py p1-input01.txt simout01.txt")
+        exitError("ERROR: Invalid arguments\nUSAGE: /usr/bin/python3.5 project2.py p2-test-input01.txt simout01.txt")
 
     #extract our processes from the input file, then begin the simulation
     processes = readInput(sys.argv[1])
-    sim = MemoryStore()
+    Simulator.processes = processes
+    Simulator.algo = MemoryAlgorithm.bestFit
+    Simulator.run()
     
 if __name__ == "__main__":
     main()

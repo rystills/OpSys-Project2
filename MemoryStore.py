@@ -2,7 +2,7 @@ from Process import Process
 from enum import Enum
 from Event import Event, EventType
 import bisect
-from Simulator import Simulator
+import Simulator
 
 """
 State is a simple enum containing each of the potential process states
