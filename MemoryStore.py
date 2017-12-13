@@ -133,11 +133,12 @@ class MemoryStore():
         for loc in freeLocs:
             if (loc[1] >= process.memSize and loc[0] > self.lastPlacedLoc):
                 #we found a location for the process! add it to the processes list
-                process.memLocation = loc[0]
-                self.memory = self.memory[:loc[0]] + process.pid*process.memSize + self.memory[loc[0]+process.memSize:]
+                startPos = loc[0]# if loc[0] >= self.lastPlacedLoc else self.lastPlacedLoc
+                process.memLocation = startPos
+                self.memory = self.memory[:startPos] + process.pid*process.memSize + self.memory[startPos+process.memSize:]
                 process.memEnterTime = Simulator.simTime
                 self.insertProcess(process)
-                self.lastPlacedLoc = loc[0]
+                self.lastPlacedLoc = startPos + process.memSize
                 return True
         
         #we didn't find a valid memory location after lastPlacedLoc, so now let's search again from the beginning up to lastPlacedLoc
@@ -148,15 +149,25 @@ class MemoryStore():
                 self.memory = self.memory[:loc[0]] + process.pid*process.memSize + self.memory[loc[0]+process.memSize:]
                 process.memEnterTime = Simulator.simTime
                 self.insertProcess(process)
-                self.lastPlacedLoc = loc[0]
+                self.lastPlacedLoc = loc[0] + process.memSize
                 return True
             
         #we didn't find a location at which to place the process, so defragment and try again
+        return self.checkFirstRun(firstRun,self.addProcessNext,process)
+    
+    """
+    check if we are on the first pass of attempting to add a process. if so, defrag if it will generate enough space
+    @param firstRun: whether this is the first time we have attempted to add the process during this event (true) or not (false)
+    @param func: the add function to call again after defragmenting
+    @param proc: the process we wish to add
+    @returns a call to the specified function after defragmenting if this is the first run and defragmenting will help; otherwise false
+    """
+    def checkFirstRun(self,firstRun, func, proc):
         if (firstRun):
-            if (self.defragmentWillWork(process.memSize)):
-                print("time {0}ms: Cannot place process {1} -- starting defragmentation".format(Simulator.simTime,process.pid))
+            if (self.defragmentWillWork(proc.memSize)):
+                print("time {0}ms: Cannot place process {1} -- starting defragmentation".format(Simulator.simTime,proc.pid))
                 self.defragment()
-                return self.addProcessNext(process, False)
+                return func(proc,False)
         #we already defragmented and still didn't find a location, so nothing we can do
         return False
 
@@ -175,17 +186,11 @@ class MemoryStore():
                 self.memory = self.memory[:loc[0]] + process.pid*process.memSize + self.memory[loc[0]+process.memSize:]
                 process.memEnterTime = Simulator.simTime
                 self.insertProcess(process)
-                self.lastPlacedLoc = loc[0]
+                self.lastPlacedLoc = loc[0] + process.memSize
                 return True
             
         #we didn't find a location at which to place the process, so defragment and try again
-        if (firstRun):
-            if (self.defragmentWillWork(process.memSize)):
-                print("time {0}ms: Cannot place process {1} -- starting defragmentation".format(Simulator.simTime,process.pid))
-                self.defragment()
-                return self.addProcessFirst(process, False)
-        #we already defragmented and still didn't find a location, so nothing we can do
-        return False
+        return self.checkFirstRun(firstRun,self.addProcessFirst,process)
                 
     """
     add a process to the store using the best-fit algorithm
@@ -209,14 +214,8 @@ class MemoryStore():
                 self.memory = self.memory[:smallestValidLoc] + process.pid*process.memSize + self.memory[smallestValidLoc+process.memSize:]
                 process.memEnterTime = Simulator.simTime
                 self.insertProcess(process)
-                self.lastPlacedLoc = smallestValidLoc
+                self.lastPlacedLoc = smallestValidLoc + process.memSize
                 return True
             
         #we didn't find a location at which to place the process, so defragment and try again
-        if (firstRun):
-            if (self.defragmentWillWork(process.memSize)):
-                print("time {0}ms: Cannot place process {1} -- starting defragmentation".format(Simulator.simTime,process.pid))
-                self.defragment()
-                return self.addProcessBest(process, False)
-        #we already defragmented and still didn't find a location, so nothing we can do
-        return False
+        return self.checkFirstRun(firstRun,self.addProcessBest,process)

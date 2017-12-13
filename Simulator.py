@@ -36,13 +36,17 @@ def addEvent(eventType, time, process):
 show a message indicating that the Simulator is starting up
 """
 def showStartMessage():
-    print("time 0ms: Simulator started ({0} -- {1})".format("Contiguous" if this.contiguous else "Non-contiguous", this.algo.name))
+    print("time 0ms: Simulator started ({0} -- {1})".format("Contiguous" if this.contiguous else "Non-contiguous", 
+                                                            "Next-Fit" if this.algo == MemoryAlgorithm.nextFit else 
+                                                            ("First-Fit" if this.algo == MemoryAlgorithm.firstFit else "Best-Fit")))
     
 """
 show a message indicating that the Simulator has ended
 """
 def showStopMessage():
-    print("time {0}ms: Simulator ended ({1} -- {2})".format(this.simTime, "Contiguous" if this.contiguous else "Non-contiguous", this.algo.name))
+    print("time {0}ms: Simulator ended ({1} -- {2})".format(this.simTime, "Contiguous" if this.contiguous else "Non-contiguous", 
+                                                            "Next-Fit" if this.algo == MemoryAlgorithm.nextFit else 
+                                                            ("First-Fit" if this.algo == MemoryAlgorithm.firstFit else "Best-Fit")))
     
 """
 process the specified event, calling the corresponding helper method
@@ -62,7 +66,7 @@ when a process switches in, display that information and add it to the Memory St
 """
 def handleSwitchIn(event):
     p = event.process
-    print("time {0}ms: Process {1} arrived (requires {2} frames)".format(this.simTime, p.pid, p.arrivalRunPairs[p.pairsCompleted][1]))
+    print("time {0}ms: Process {1} arrived (requires {2} frames)".format(this.simTime, p.pid, p.memSize))
     retVal = False
     
     #call the placement function corresponding to our current memory algorithm
@@ -76,11 +80,11 @@ def handleSwitchIn(event):
     #show success or failure depending on whether or not we were able to place the process in memory
     if (retVal):
         print("time {0}ms: Placed process {1}:".format(this.simTime, p.pid))
-        print(this.memStore)
         #upon placing the process, add a corresponding removal event
         addEvent(EventType.SwitchOut, this.simTime + p.arrivalRunPairs[p.pairsCompleted][1], p)
     else:
-        print("time {0}ms: Cannot place process {1} -- skipped".format(this.simTime, p.pid))
+        print("time {0}ms: Cannot place process {1} -- skipped!".format(this.simTime, p.pid))
+    print(this.memStore)
 
 """
 when a process switches out, display that information and remove it from the Memory Store

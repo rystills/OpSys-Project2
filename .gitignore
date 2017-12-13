@@ -1,3 +1,6 @@
 # ignore eclipse project files
 *.project
 *.pydevproject
+
+# ignore submissions
+submissions

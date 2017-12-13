@@ -3,8 +3,8 @@ from enum import Enum
 EventType is a simple enum containing each of the potential EventTypes that may occur in our simulation
 """ 
 class EventType(Enum):
-    SwitchIn = 1
-    SwitchOut = 2
+    SwitchOut = 1
+    SwitchIn = 2
     
 """
 the event class is responsible for holding information about events that will occur at calculated points in time

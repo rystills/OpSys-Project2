@@ -44,11 +44,13 @@ def main():
     Simulator.processes = copy.deepcopy(processes)
     Simulator.algo = MemoryAlgorithm.nextFit
     Simulator.run()
+    print()
     
     Simulator.reset()
     Simulator.processes = copy.deepcopy(processes)
     Simulator.algo = MemoryAlgorithm.firstFit
     Simulator.run()
+    print()
     
     Simulator.reset()
     Simulator.processes = copy.deepcopy(processes)
