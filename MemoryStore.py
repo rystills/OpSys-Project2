@@ -2,6 +2,7 @@ from Process import Process
 from enum import Enum
 from Event import Event, EventType
 import bisect
+
 """
 State is a simple enum containing each of the potential process states
 """
@@ -79,6 +80,9 @@ class MemoryStore():
     defragment our memory, moving processes up to fill all free gaps, and increasing simTime accordingly
     """
     def defragment(self):
+        #keep track of how far we move time forward so we can push back events accordingly
+        prevSimTime = self.simTime
+        
         self.lastPlacedLoc = -1
         for proc in self.processes:
             earliestFree = self.memory.find('.')
@@ -88,8 +92,14 @@ class MemoryStore():
                 reinsertedMem = removedMem[:earliestFree] + proc.pid * proc.memSize + removedMem[earliestFree:]
                 self.memory = reinsertedMem
                 #add t_memmove for each frame of memory in the process
-                self.simTime += self.t_memmove * proc.memSize           
+                self.simTime += self.t_memmove * proc.memSize
         
+        timeDiff = self.simTime - prevSimTime
+        
+        #update all events to compensate for elapsed time during defragmentation
+        for ev in self.events:
+                ev.time += timeDiff    
+
     """
     insert the specified process into our processes list sorted by memLocation
     """
