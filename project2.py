@@ -39,22 +39,33 @@ def main():
     if (len(sys.argv) < 2):
         exitError("ERROR: Invalid arguments\nUSAGE: /usr/bin/python3.5 project2.py p2-test-input01.txt simout01.txt")
 
-    #extract our processes from the input file, then begin the simulation
+    #extract our processes from the input file before beginning the simulation
     processes = readInput(sys.argv[1])
+    
+    #run next-fit
     Simulator.processes = copy.deepcopy(processes)
     Simulator.algo = MemoryAlgorithm.nextFit
     Simulator.run()
     print()
     
+    #run first-fit
     Simulator.reset()
     Simulator.processes = copy.deepcopy(processes)
     Simulator.algo = MemoryAlgorithm.firstFit
     Simulator.run()
     print()
     
+    #run best-fit
     Simulator.reset()
     Simulator.processes = copy.deepcopy(processes)
     Simulator.algo = MemoryAlgorithm.bestFit
+    Simulator.run()
+    
+    #run non-contiguous
+    Simulator.reset()
+    Simulator.processes = copy.deepcopy(processes)
+    Simulator.algo = None
+    Simulator.contiguous = False
     Simulator.run()
     
 if __name__ == "__main__":

@@ -38,17 +38,21 @@ def addEvent(eventType, time, process):
 show a message indicating that the Simulator is starting up
 """
 def showStartMessage():
-    print("time 0ms: Simulator started ({0} -- {1})".format("Contiguous" if this.contiguous else "Non-contiguous", 
-                                                            "Next-Fit" if this.algo == MemoryAlgorithm.nextFit else 
+    if (this.contiguous):
+        print("time 0ms: Simulator started (Contiguous -- {0})".format("Next-Fit" if this.algo == MemoryAlgorithm.nextFit else 
                                                             ("First-Fit" if this.algo == MemoryAlgorithm.firstFit else "Best-Fit")))
+    else:
+        print("time 0ms: Simulator started (Non-contiguous)")
     
 """
 show a message indicating that the Simulator has ended
 """
 def showStopMessage():
-    print("time {0}ms: Simulator ended ({1} -- {2})".format(this.simTime, "Contiguous" if this.contiguous else "Non-contiguous", 
-                                                            "Next-Fit" if this.algo == MemoryAlgorithm.nextFit else 
+    if (this.contiguous):
+        print("time 0ms: Simulator ended (Contiguous -- {0})".format("Next-Fit" if this.algo == MemoryAlgorithm.nextFit else 
                                                             ("First-Fit" if this.algo == MemoryAlgorithm.firstFit else "Best-Fit")))
+    else:
+        print("time 0ms: Simulator ended (Non-contiguous)")
     
 """
 process the specified event, calling the corresponding helper method
