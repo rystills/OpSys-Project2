@@ -104,6 +104,16 @@ class MemoryStore():
     """
     def insertProcess(self,process):
         bisect.insort(self.processes,process)
+        
+    """
+    remove the specified process from the memory store
+    """
+    def removeProcess(self,process):
+        #remove the process from memory
+        self.memory = self.memory[:process.memLocation] + '.'*process.memSize + self.memory[process.memLocation+process.memSize:]
+                
+        #remove the process from our processes list
+        self.processes.remove(process)
 
     """
     add a process to the store using the next-fit algorithm

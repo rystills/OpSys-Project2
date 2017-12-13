@@ -26,6 +26,7 @@ class Process():
         #initialize state info for interacting with the memory store
         self.memLocation = -1
         self.memEnterTime = -1
+        self.pairsCompleted = 0
    
     """
     return a string displaying this process' pid, memsize, and arrival/run pairs
